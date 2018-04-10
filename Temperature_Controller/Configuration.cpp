@@ -23,7 +23,7 @@ void Configuration::loadDefaultProfile() {
   //heat Zones
   profile.zone1InitialSetTemp = 0.0;
   
-  profile.zone1SetTemp = 100.0;
+  profile.zone1SetTemp = 90.0;
 
   //Safety parameters
   profile.maxTemp = 285; //The max temp allowed for any heating zone
@@ -43,7 +43,7 @@ void Configuration::loadDefaultConfig()
   physical.zone1.Kd = 0.0;
   physical.zone1.Ki = 0.15;
   physical.zone1.Kp = 3.4;
-  physical.zone1.maxDutyCycle = 100;
+  physical.zone1.maxDutyCycle = 50;
   physical.zone1.minDutyCycle = 0;
   physical.zone1.thermistorBCoefficient = 3950;
   physical.zone1.thermistorNumSamples = 20;
