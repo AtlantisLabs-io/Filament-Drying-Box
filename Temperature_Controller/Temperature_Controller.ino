@@ -4,7 +4,7 @@
 #include "Heater.h"
 //Globals
 unsigned long now;
-int refreshTime;
+unsigned long refreshTime;
 int refreshInterval = 1000;
 
 
@@ -24,7 +24,7 @@ void setup() {
   Serial.print("SetTemp: ");
   Serial.println(configuration.physical.zone1.setTemp);
   heater1.setMode(MANUAL);
-  heater1.setDutyCycle(100);
+  heater1.setDutyCycle(50);
   heater1.setMode(AUTOMATIC);
 
 }

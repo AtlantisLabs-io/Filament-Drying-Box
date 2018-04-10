@@ -21,36 +21,12 @@ class Configuration
       //General
       int profileNumber;
       char name[20];
-      double diaSetpoint;//mm
-      float density; //g/cm3
-      float tolerance;//mm
-
-      //Starve Feeder
-      float gramsPerMin;
-
-
-      //Auger
-      float augerRPM;
-
-      //Outfeed
-      double outfeedRPM;
-
-
-      double soakTime;
-
+ 
       //heating Zones
       double zone1InitialSetTemp;
-      double zone2InitialSetTemp;
-      double zone3InitialSetTemp;
-      double zone4InitialSetTemp;
-      double zone5InitialSetTemp;
 
       double zone1SetTemp;
-      double zone2SetTemp;
-      double zone3SetTemp;
-      double zone4SetTemp;
-      double zone5SetTemp;
-
+ 
       //Safety parameters
       double minExtrudeTemp;
       double maxTemp; //The maximum temp allowed for any heating zone
@@ -76,98 +52,21 @@ class Configuration
       boolean activeCooling;
     };
 	
-	//A struct the same as diameter sensor register.
-	typedef struct DiaSensorRegMap_S {
-		double diameter; //byte 0
-		double rpm;//byte 4 //disable stepper if RPM = 0
-		double diaSetpoint; //byte 8
-		byte mode; //byte 12
-		int sampleTime; //byte 13
-		double kp;//byte 15
-		double ki; //byte 19
-		double kd; //byte 23
-		double outputMin; //byte 27
-		double outputMax; //byte 31
-		boolean laserOn;//byte 35
-		char version[8]; //byte 36
-	};
 	
-	//A union with byte array for easily reading/writing data
-	//using the wire library
-	typedef union DiaSensorRegMap_u {
-		DiaSensorRegMap_S s;
-		byte b[sizeof(DiaSensorRegMap_S)];
-	};
-
     /*The physicalConfig struct holds information describing *
-     *the physical setup of the extruder.                    */
+     *the physical setup of the Heater box.                    */
 
     struct PhysicalConfig {
       //variables that help with storage
       boolean configStored;
       boolean loadAutomatically;
 
-      //StarveFeeder
-      int starveFeederSlaveAddress;
-      float starveFeederLumpMass;
-      int starveFeederHomePosition;
-      int starveFeederDumpPosition;
-      int starveFeederStepDelay;
-      int starveFeederHomingStepDelay;
-      int starveFeederOverRotation;
-      boolean starveFeederDirection;
-      int starveFeederVibDutyCycle;
-      int starveFeederStartupDutyCycle;
-      int starveFeederMaxDutyCycle;
-      int starveFeederMinDutyCycle;
-      int starveFeederMinFillTime;
-      int starveFeederMaxFillTime;
-      int starveFeederStartupTime;
-      int starveFeederDebounceTime;
-
-
-      //Auger
-      int augerPinSet;
-      int augerStepMode;
-      boolean augerDirection;
-      boolean augerEnable;
-      float augerGearRatio;
-
-      //Outfeed
-      int outfeedPinSet;
-      int outfeedStepMode;
-      boolean outfeedDirection;
-      boolean outfeedEnable;
-      float outfeedRollerRadius;
-      double outfeedMaxRPM;
-      double outfeedMinRPM;
-
-
-      //Spooler
-      int spoolerPinSet;
-      int spoolerStepMode;
-      boolean spoolerDirection;
-      boolean spoolerEnable;
-      float spoolerDiskRadius;
-      float spoolerCoreRadius;
-      float spoolerTraverseLength;
-      float spoolerMotorRollerRadius;
-
       //Heating Zones
       HeatingZone zone1;
-      HeatingZone zone2;
-      HeatingZone zone3;
-      HeatingZone zone4;
-      HeatingZone zone5;
 
-      //Diameter Sensor
-      DiaSensorRegMap_u diaSensorRegMap;//The register map which is a union of a byte array and a struct
-      DiaSensorRegMap_u qcDiaSensorRegMap;//The register map which is a union of a byte array and a struct
 
       //Parameters for the different states
       double maxTemp;
-      unsigned long loadFilamentTime; //The number of minutes allowed for loading the filament.
-
     } physical;
 
     char profileNames[10][20];
