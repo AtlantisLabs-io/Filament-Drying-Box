@@ -43,22 +43,22 @@ void Thermistor:: sampleTemp() {
 			_sampleCounter = 0;
 			_sampleSum = 0.0;
 			
-			_avgTemp = lookUpTemp();
-			temp = _avgTemp;
+			//_avgTemp = lookUpTemp();
+			//temp = _avgTemp;
 
 			// The following is for use without lookup table.
-			//      // convert the value to resistance
-			//      average = 1023.0 / average - 1.0;
-			//      average = _seriesResistor / average;
-			//
-			//      //    _avgTemp;
-			//      _avgTemp = average / (float)_rNominal; // (R/Ro)
-			//      _avgTemp = log(_avgTemp); // ln(R/Ro)
-			//      _avgTemp /= (float)_bCoefficient; // 1/B * ln(R/Ro)
-			//      _avgTemp += 1.0 / ((float)_tTempNominal + 273.15); // + (1/To)
-			//      _avgTemp = 1.0 / _avgTemp; // Invert
-			//      _avgTemp -= 273.15; // convert to C
-			//      temp = _avgTemp; //update public variable;
+			      // convert the value to resistance
+			      average = 1023.0 / average - 1.0;
+			      average = _seriesResistor / average;
+			
+			      //    _avgTemp;
+			      _avgTemp = average / (float)_rNominal; // (R/Ro)
+			      _avgTemp = log(_avgTemp); // ln(R/Ro)
+			      _avgTemp /= (float)_bCoefficient; // 1/B * ln(R/Ro)
+			      _avgTemp += 1.0 / ((float)_tTempNominal + 273.15); // + (1/To)
+			      _avgTemp = 1.0 / _avgTemp; // Invert
+			      _avgTemp -= 273.15; // convert to C
+			      temp = _avgTemp; //update public variable;
 			} else {
 			_sampleCounter++;
 		}

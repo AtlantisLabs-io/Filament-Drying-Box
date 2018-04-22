@@ -1,12 +1,12 @@
 /*
   Heater.h - Library for activating the the barrel heater.
- The barrel heater is a 120 v 130 w heating element powered
- by an electro-mechanical relay. The relay coil is optically 
- isolated from the logic circuits and is activated by pin 7.
- 
- Created by Matthew P. Rogge, Februrary 12, 2014.
- Released into the public domain.
- */
+  The barrel heater is a 120 v 130 w heating element powered
+  by an electro-mechanical relay. The relay coil is optically
+  isolated from the logic circuits and is activated by pin 7.
+
+  Created by Matthew P. Rogge, Februrary 12, 2014.
+  Released into the public domain.
+*/
 #ifndef Heater_h
 #define Heater_h
 
@@ -21,36 +21,35 @@ class Configuration;
 
 class Heater
 {
-public:
+  public:
 
-  Heater(Configuration::HeatingZone* zone);//constructor
-  void activate();
-  void setDutyCycle(float dutyCycle);
-  double getDutyCycle(); 
-  void sampleTemp();
-  float getTemp();
-  int getRaw();
-  void off();
-  void setMode(int mode);
+    Heater(double setTemp);//constructor
+    void activate();
+    void setDutyCycle(float dutyCycle);
+    double getDutyCycle();
+    void sampleTemp();
+    float getTemp();
+    int getRaw();
+    void off();
+    void setMode(int mode);
 
-  
-private:
 
-  Thermistor       _thermistor;
-  PID              _pid;
-  int*             _timeBase;
-  double           _dutyCycle;
-  double*          _temp;
-  int*			   _heaterPin;
-  int*			   _coolerPin;
-  boolean*		   _PWM;
-  boolean*		   _activeCooling;
-  double*		   _maxDutyCycle;
-  double*		   _minDutyCycle;
-  unsigned long	   _now;
-  unsigned long   _durration;
-  unsigned long   _startTime;
-  boolean	      _boostNeeded;
+  private:
+
+    Thermistor       _thermistor;
+    PID              _pid;
+    int             _timeBase;
+    double*          _temp;
+    int			   _heaterPin;
+    boolean		   _PWM;
+    double  _dutyCycle;
+
+    double		   _maxDutyCycle;
+    double		   _minDutyCycle;
+    unsigned long	   _now;
+    unsigned long   _durration;
+    unsigned long   _startTime;
+    boolean	      _boostNeeded;
 
 };
 

@@ -1,14 +1,36 @@
 /*
-  Configuration.h - Library for saving, loading,
- and deleting the various configurations both
- for the active profile and the physical setup
- of the extruder.
+  Configuration.h
 
- Created by Matthew P. Rogge, Februrary 12, 2014.
+  Contains the settings for vairous elements of the heater box.
+
+ Created by Christine Matthew P. Rogge
+ Februrary 12, 2014.
  Released into the public domain.
  */
+ 
+ #define HEATER_PIN  11
+ #define KI 0.15
+ #define KP 3.4
+ #define KD 0.0
+ #define MAX_DUTY_CYCLE  90
+ #define MIN_DUTY_CYCLE 0
+ #define B_COEFFICIENT 4096
+ #define NUM_THERMISTOR_SAMPLES 20
+ #define THERMISTOR_PIN A6
+ #define R_NOMINAL 100000
+ #define T_NOMINAL 25
+ #define SERIES_RESISTOR 10000
+ #define TIME_BASE 2000
+ #define PWM true
+ #define MAX_TEMP 100 //the max temp any heater is allowed to achieve
+ #define MIN_SET_TEMP 0 //The minimum set temperature
+
+ //DHT sensor
+ #define DHTPIN 2    
+#define DHTTYPE DHT22   // DHT 22  (AM2302)
 
 
+/*
 #ifndef Configuration_h
 #define Configuration_h
 
@@ -54,7 +76,7 @@ class Configuration
 	
 	
     /*The physicalConfig struct holds information describing *
-     *the physical setup of the Heater box.                    */
+     *the physical setup of the Heater box.                    
 
     struct PhysicalConfig {
       //variables that help with storage
@@ -93,5 +115,5 @@ class Configuration
 };
 
 #endif
-
+*/
 
