@@ -29,7 +29,8 @@
  #define DHTPIN 2    
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
 
-
+//Fan
+#define FAN_PIN 3
 /*
 #ifndef Configuration_h
 #define Configuration_h

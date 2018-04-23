@@ -114,8 +114,17 @@ void setup() {
   Timer1.initialize(1000);
   Timer1.attachInterrupt(timerIsr);
 
+  //fan
+  pinMode(FAN_PIN, OUTPUT);
+  analogWrite(FAN_PIN, 100);
+
+  heater.setMode(MANUAL);
+  heater.setDutyCycle(100);
+
   //Print initial values to LCD
   drawMenu();
+
+
 }
 
 void loop() {
@@ -125,16 +134,16 @@ void loop() {
   heater.activate();
   actTemp = heater.getTemp();
   heaterDS = heater.getDutyCycle();
-  
+
   //check humidity
-  humidity= round(dht.readHumidity());
+  humidity = round(dht.readHumidity());
   tempDHT = round(dht.readTemperature());
 
 
   //update the menu if the updateTime has been reached.
   //This keeps the displayed temperatures and duty cycles up to date
   now = millis();
-  if (now > updateTime){
+  if (now > updateTime) {
     updateTime = now + updateInterval;
     drawMenu(); // may need to switch to updateMenu() to reduce lcd flicker.
   }
@@ -171,32 +180,48 @@ void displayMenu() {
 
 void drawMenu() {
   char val1Str[4];
-  itoa(*menu[topItem].value, val1Str,10);
+  itoa(*menu[topItem].value, val1Str, 10);
   char val2Str[4];
-  itoa(*menu[topItem+1].value, val2Str,10);
-  
+  itoa(*menu[topItem + 1].value, val2Str, 10);
+
   //redraw the menu
+  lcd.clear();
   if (topItem == selectedItem) {
     Serial.print(">");
+    lcd.setCursor(0, 0);
+    lcd.print (">");
+
   } else {
     Serial.print(" ");
+    lcd.setCursor(1, 0);
+
   }
+  lcd.print(menu[topItem].text);
+  lcd.setCursor(15 - getDigits(*menu[topItem].value), 0);
+  lcd.print(menu[topItem + 1].text);
+  lcd.setCursor(15 - getDigits(*menu[topItem + 1].value), 0);
+
   Serial.print(menu[topItem].text);
   Serial.print("\t");
   Serial.println(val1Str);
 
   if (topItem + 1 == selectedItem) {
     Serial.print(">");
+    lcd.print (">");
   } else {
     Serial.print(" ");
+    lcd.setCursor(1, 1);
   }
   Serial.print(menu[topItem + 1].text);
   Serial.print("\t");
   Serial.println(val2Str);
   Serial.println();
+  lcd.print(menu[topItem + 1].text);
+  lcd.setCursor(15 - getDigits(*menu[topItem + 1].value), 0);
+
 }
 
-void updateMenu(){
+void updateMenu() {
   //Update the values being displayed without rewriting the entire lcd screen.
 }
 
@@ -217,6 +242,19 @@ void menuDown() {
     selectedItem++;
   }
 }
+
+//getDigits figures out how many digits are in a positive integer
+int getDigits(int val) {
+  int count = 0;
+  while (val != 0)
+  {
+    // n = n/10
+    val /= 10;
+    ++count;
+  }
+  return count;
+}
+
 
 void changeSetTemp() {
   static int prevTemp;
