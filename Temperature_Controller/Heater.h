@@ -23,7 +23,7 @@ class Heater
 {
   public:
 
-    Heater(double setTemp);//constructor
+    Heater(double* setTemp);//constructor
     void activate();
     void setDutyCycle(float dutyCycle);
     double getDutyCycle();
@@ -32,6 +32,7 @@ class Heater
     int getRaw();
     void off();
     void setMode(int mode);
+    int getMode();
 
 
   private:

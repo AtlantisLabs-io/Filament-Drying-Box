@@ -35,12 +35,14 @@ unsigned long updateTime;
 int updateInterval = 1000;
 
 //create the heater
-Heater heater(setTemp);
+double setTempD;
+Heater heater(&setTempD);
 
 //fan
 int fanState = LOW;             // ledState used to set the LED
 unsigned long previousMillis = 0;        // will store last time LED was updated
-long interval = 1000;
+long fanInterval = 0;
+long interval;
 
 //DHT Sensor
 DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
@@ -51,6 +53,7 @@ DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
 enum States {
   DISPLAY_MENU,
   CHANGE_SET_TEMP,
+  CHANGE_HEATER_DS,
   CHANGE_FAN_DS,
   SAVE_SETTINGS,
   SAFETY_SHUTDOWN
@@ -62,6 +65,7 @@ boolean stateChanged = false;
 //Declare state functions
 void displayMenu();
 void changeSetTemp();
+void changeHeaterDS();
 void changeFanDS();
 void saveSettings();
 void safetyShutdown();
@@ -70,6 +74,7 @@ void safetyShutdown();
 void (*state_table[])() = {
   displayMenu,
   changeSetTemp,
+  changeHeaterDS,
   changeFanDS,
   saveSettings,
   safetyShutdown
@@ -83,17 +88,18 @@ struct MenuItem {
   int* value;
   States state;
 };
+//
+//void changeSetTemp();
+//void changeFanDS();
+//void saveSettings();
 
-void changeSetTemp();
-void changeFanDS();
-void saveSettings();
 int selectedItem = 0;
 int topItem = 0;
 const int numMenuItems = 6;
 struct MenuItem menu[numMenuItems] = {
   {"Set Temp", &setTemp, CHANGE_SET_TEMP},
   {"Act Temp", &actTemp, DISPLAY_MENU},
-  {"Heater DS", &heaterDS, DISPLAY_MENU},
+  {"Heater DS", &heaterDS, CHANGE_HEATER_DS},
   {"Fan DS", &fanDS, CHANGE_FAN_DS},
   {"Humidity", &humidity, DISPLAY_MENU},
   {"Save Settings", NULL, SAVE_SETTINGS}
@@ -124,7 +130,7 @@ void setup() {
   pinMode(FAN_PIN, OUTPUT);
 
   heater.setMode(MANUAL);
-  heater.setDutyCycle(9);
+  heater.setDutyCycle(0);
 
   //Print initial values to LCD
   drawMenu();
@@ -145,20 +151,21 @@ void loop() {
 
     // if the LED is off turn it on and vice-versa:
     if (fanState == LOW) {
-      interval = 1000;
+      interval = fanInterval;
       fanState = HIGH;
     } else {
-      interval = 100;
+      interval = 10;
       fanState = LOW;
     }
 
     // set the LED with the fanState of the variable:
-    digitalWrite(FAN_PIN, fanState);
+    if (fanDS > 0) {
+      digitalWrite(FAN_PIN, fanState);
+    }
   }
   //activate heaters
   heater.activate();
   actTemp = heater.getTemp();
-  heaterDS = heater.getDutyCycle();
 
   //check humidity
   humidity = round(dht.readHumidity());
@@ -167,11 +174,14 @@ void loop() {
 
   //update the menu if the updateTime has been reached.
   //This keeps the displayed temperatures and duty cycles up to date
-    now = millis();
-    if (now >= updateTime) {
-      updateTime = now + updateInterval;
-      drawMenu(); // may need to switch to updateMenu() to reduce lcd flicker.
-    }
+  now = millis();
+  if (now >= updateTime && currentState == DISPLAY_MENU) {
+    updateTime = now + updateInterval;
+    heaterDS = heater.getDutyCycle();
+    drawMenu();
+    Serial.print("DutyCycle");
+    Serial.println(heater.getDutyCycle());
+  }
 
   //Call function of the current state
   state_table[currentState]();
@@ -292,7 +302,7 @@ void changeSetTemp() {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print(menu[selectedItem].text);
-    lcd.setCursor(8 - getDigits(*menu[selectedItem].value), 1);
+    lcd.setCursor(9 - getDigits(*menu[selectedItem].value), 1);
     lcd.print(*menu[selectedItem].value);
   }
 
@@ -301,6 +311,8 @@ void changeSetTemp() {
   //If the button has been clicked, switch to selected item's state
   if (bState == ClickEncoder::Clicked) {
     currentState = DISPLAY_MENU;
+    heater.setMode(AUTOMATIC);
+    setTempD = (double)setTemp;
     drawMenu();
     return;
   }
@@ -314,23 +326,103 @@ void changeSetTemp() {
     setTemp = MAX_TEMP;
   }
   if (setTemp != prevTemp) {
-    lcd.setCursor(7, 1);
+    lcd.setCursor(6, 1);
     lcd.print("   ");
-    lcd.setCursor(8 - getDigits(*menu[selectedItem].value), 1);
+    lcd.setCursor(9 - getDigits(*menu[selectedItem].value), 1);
     lcd.print(*menu[selectedItem].value);
-    Serial.print("New Temp: ");
-    Serial.println(setTemp);
     prevTemp = setTemp;
   }
 
 }
 
+void changeHeaterDS() {
+  static int prevHeaterDS;
+
+  //If the state has just been changed to changeSetTemp, set up the screen
+  if (stateChanged) {
+    stateChanged = false;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(menu[selectedItem].text);
+    lcd.setCursor(9 - getDigits(*menu[selectedItem].value), 1);
+    lcd.print(*menu[selectedItem].value);
+  }
+  bState = encoder->getButton();
+
+  //If the button has been clicked, switch to selected item's state
+  if (bState == ClickEncoder::Clicked) {
+    heater.setMode(MANUAL);
+    setTemp = 0;
+    setTempD = 0;
+    heater.setDutyCycle(heaterDS);
+    currentState = DISPLAY_MENU;
+    drawMenu();
+    return;
+  }
+
+  heaterDS += encoder->getValue();
+  if (heaterDS < MIN_DUTY_CYCLE) {
+    heaterDS = MIN_DUTY_CYCLE;
+  }
+
+  if (heaterDS > MAX_DUTY_CYCLE) {
+    heaterDS = MAX_DUTY_CYCLE;
+  }
+  if (heaterDS != prevHeaterDS) {
+    Serial.println(heaterDS);
+
+    lcd.setCursor(6, 1);
+    lcd.print("   ");
+    lcd.setCursor(9 - getDigits(*menu[selectedItem].value), 1);
+    lcd.print(*menu[selectedItem].value);
+    lcd.print(menu[selectedItem].text);
+    prevHeaterDS = heaterDS;
+  }
+
+}
 
 void changeFanDS() {
-  Serial.println("Changing Fan DS!");
-  Serial.println();
-  currentState = DISPLAY_MENU;
-  drawMenu();
+  static int prevDS;
+
+  //If the state has just been changed to changeSetTemp, set up the screen
+  if (stateChanged) {
+    stateChanged = false;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(menu[selectedItem].text);
+    lcd.setCursor(9 - getDigits(*menu[selectedItem].value), 1);
+    lcd.print(*menu[selectedItem].value);
+  }
+
+  bState = encoder->getButton();
+
+  //If the button has been clicked, switch to selected item's state
+  if (bState == ClickEncoder::Clicked) {
+    fanInterval = fanDS * 20;
+        if (fanDS == 0) {
+      digitalWrite(FAN_PIN, LOW);
+    }
+    currentState = DISPLAY_MENU;
+    drawMenu();
+    return;
+  }
+
+  fanDS += encoder->getValue();
+  if (fanDS < FAN_MIN_DS) {
+    fanDS = FAN_MIN_DS;
+  }
+
+  if (fanDS > FAN_MAX_DS) {
+    fanDS = FAN_MAX_DS;
+  }
+  if (fanDS != prevDS) {
+    lcd.setCursor(6, 1);
+    lcd.print("   ");
+    lcd.setCursor(9 - getDigits(*menu[selectedItem].value), 1);
+    lcd.print(*menu[selectedItem].value);
+    prevDS = fanDS;
+  }
+
 }
 
 

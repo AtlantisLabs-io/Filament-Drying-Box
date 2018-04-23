@@ -11,7 +11,7 @@
 #include "Arduino.h"
 #include "Heater.h"
 
-Heater::Heater(double setTemp)
+Heater::Heater(double* setTemp)
   : _thermistor(THERMISTOR_PIN,
                 R_NOMINAL,
                 T_NOMINAL,
@@ -20,7 +20,7 @@ Heater::Heater(double setTemp)
                 SERIES_RESISTOR),
     _pid( &_thermistor.temp,
           &_dutyCycle,
-          &setTemp,
+          setTemp,
           KP,
           KI,
           KD,
@@ -115,6 +115,10 @@ void Heater::setMode(int mode)
   _pid.SetMode(mode);
 }
 
+int Heater::getMode()
+{
+  return _pid.GetMode();
+}
 float Heater::getTemp() {
   return _thermistor.temp;
 }

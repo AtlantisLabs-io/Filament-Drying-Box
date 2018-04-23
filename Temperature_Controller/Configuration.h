@@ -9,8 +9,8 @@
  */
  
  #define HEATER_PIN  11
- #define KI 0.15
  #define KP 3.4
+ #define KI 0.15
  #define KD 0.0
  #define MAX_DUTY_CYCLE  90
  #define MIN_DUTY_CYCLE 0
@@ -31,6 +31,8 @@
 
 //Fan
 #define FAN_PIN 3
+#define FAN_MAX_DS 100
+#define FAN_MIN_DS 0
 /*
 #ifndef Configuration_h
 #define Configuration_h
